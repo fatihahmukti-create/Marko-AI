@@ -10,6 +10,7 @@ const App: React.FC = () => {
   const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
   const [marketingPlan, setMarketingPlan] = useState<MarketingPlan | null>(null);
   const [showChat, setShowChat] = useState(false);
+  const [chatInitialMessage, setChatInitialMessage] = useState<string>('');
 
   const handleFormSubmit = async (data: BusinessInput) => {
     setStatus(AnalysisStatus.LOADING);
@@ -28,12 +29,25 @@ const App: React.FC = () => {
     setMarketingPlan(null);
     setStatus(AnalysisStatus.IDLE);
     setShowChat(false);
+    setChatInitialMessage('');
+  };
+
+  const handleAskAI = (message: string) => {
+    setShowChat(true);
+    setChatInitialMessage(message);
+    // Add small delay to ensure chat renders if it wasn't open
+    if (!showChat) {
+      setTimeout(() => {
+        const chatInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+        if (chatInput) chatInput.focus();
+      }, 100);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
-      {/* Navigation Bar */}
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20 print:bg-white print:pb-0">
+      {/* Navigation Bar - Hidden in Print */}
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center gap-3">
@@ -66,7 +80,7 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 print:p-0 print:max-w-none">
         {status === AnalysisStatus.IDLE && (
           <div className="animate-fade-in-up">
             <div className="text-center mb-12 max-w-2xl mx-auto">
@@ -101,14 +115,21 @@ const App: React.FC = () => {
         )}
 
         {status === AnalysisStatus.SUCCESS && marketingPlan && (
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
-            <div className={`flex-grow w-full transition-all duration-500 ${showChat ? 'lg:w-2/3' : 'lg:w-full'}`}>
-              <ReportView plan={marketingPlan} onReset={resetApp} />
+          <div className="flex flex-col lg:flex-row gap-8 items-start print:block">
+            <div className={`flex-grow w-full transition-all duration-500 ${showChat ? 'lg:w-2/3' : 'lg:w-full'} print:w-full`}>
+              <ReportView 
+                plan={marketingPlan} 
+                onReset={resetApp} 
+                onAskAI={handleAskAI}
+              />
             </div>
             
             {showChat && (
               <div className="w-full lg:w-1/3 lg:sticky lg:top-24 animate-slide-in-right no-print">
-                <ChatInterface />
+                <ChatInterface 
+                  initialMessage={chatInitialMessage} 
+                  onMessageSent={() => setChatInitialMessage('')}
+                />
               </div>
             )}
           </div>

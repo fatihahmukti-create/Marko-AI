@@ -5,12 +5,18 @@ import { Chat, GenerateContentResponse } from '@google/genai';
 import { Send, User, Bot, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-const ChatInterface: React.FC = () => {
+interface ChatInterfaceProps {
+  initialMessage?: string;
+  onMessageSent?: () => void;
+}
+
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ initialMessage, onMessageSent }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chatSession, setChatSession] = useState<Chat | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const hasSentInitialRef = useRef(false);
 
   useEffect(() => {
     // Initialize chat session on mount
@@ -24,14 +30,28 @@ const ChatInterface: React.FC = () => {
     }]);
   }, []);
 
+  // Handle initial message from props (triggered by ReportView)
+  useEffect(() => {
+    if (initialMessage && chatSession && !isLoading && !hasSentInitialRef.current) {
+      handleSend(initialMessage);
+      hasSentInitialRef.current = true;
+      if (onMessageSent) onMessageSent();
+    }
+    
+    // Reset the ref if initialMessage becomes empty (parent reset it)
+    if (!initialMessage) {
+      hasSentInitialRef.current = false;
+    }
+  }, [initialMessage, chatSession]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || !chatSession) return;
+  const handleSend = async (messageText: string = input) => {
+    if (!messageText.trim() || !chatSession) return;
 
-    const userMsg: ChatMessage = { role: 'user', content: input };
+    const userMsg: ChatMessage = { role: 'user', content: messageText };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
@@ -41,7 +61,6 @@ const ChatInterface: React.FC = () => {
       const result = await chatSession.sendMessageStream({ message: userMsg.content });
       
       let fullResponse = '';
-      const botMsgId = Date.now();
       
       // Add placeholder message for streaming
       setMessages(prev => [...prev, { role: 'model', content: '' }]);
@@ -140,7 +159,7 @@ const ChatInterface: React.FC = () => {
             disabled={isLoading}
           />
           <button
-            onClick={handleSend}
+            onClick={() => handleSend()}
             disabled={isLoading || !input.trim()}
             className="absolute right-2 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-slate-300 transition-colors"
           >

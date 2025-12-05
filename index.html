@@ -27,41 +27,71 @@
         background: #94a3b8; 
       }
 
+      /* PRINT STYLES FOR PDF EXPORT */
       @media print {
         @page {
           margin: 10mm;
           size: auto;
         }
-        body {
+        
+        /* Critical: Reset height and overflow to allow multi-page printing */
+        html, body, #root, main {
+          height: auto !important;
+          overflow: visible !important;
+          width: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
           background-color: white !important;
-          print-color-adjust: exact;
-          -webkit-print-color-adjust: exact;
         }
-        .no-print {
-          display: none !important;
-        }
-        .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl {
-          box-shadow: none !important;
-          border: 1px solid #e2e8f0;
-        }
-        /* Ensure charts and colors print correctly */
+
+        /* Force background colors to print */
         * {
           print-color-adjust: exact !important;
           -webkit-print-color-adjust: exact !important;
         }
-        /* Break pages logically */
-        .break-inside-avoid {
+
+        /* Hide interactive elements */
+        nav, button, .no-print {
+          display: none !important;
+        }
+
+        /* Improve typography for print */
+        body {
+          color: black !important;
+          font-size: 12pt;
+        }
+        
+        h1, h2, h3, h4 {
+          color: #1e293b !important;
+          page-break-after: avoid;
+        }
+
+        p, li {
+          color: #334155 !important;
+          line-height: 1.5;
+        }
+
+        /* Card styling for print */
+        .bg-white, .bg-slate-50, .bg-indigo-50, .bg-emerald-50, .bg-orange-50, .bg-blue-50, .bg-red-50 {
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: none !important;
           break-inside: avoid;
         }
-        .text-white {
-          color: #1e293b !important; /* Dark slate for printing text usually white */
+
+        /* Chart container fixes */
+        .recharts-responsive-container {
+          min-height: 300px !important;
+          width: 100% !important;
         }
-        .bg-slate-900 {
-          background-color: #f1f5f9 !important; /* Light background for print save ink */
-          border: 1px solid #cbd5e1;
+
+        /* Page breaking rules */
+        .break-inside-avoid {
+          break-inside: avoid;
+          page-break-inside: avoid;
         }
-        .bg-indigo-600, .bg-gradient-to-r {
-          color: white !important; /* Keep header text white if background prints */
+        
+        .page-break-before {
+          page-break-before: always;
         }
       }
     </style>
