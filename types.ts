@@ -1,3 +1,4 @@
+
 export interface BusinessInput {
   businessName: string;
   industry: string;
@@ -34,6 +35,13 @@ export interface ActionItem {
   difficulty: 'High' | 'Medium' | 'Low';
 }
 
+export interface RiskItem {
+  riskType: string;
+  description: string;
+  impact: 'High' | 'Medium' | 'Low';
+  mitigation: string;
+}
+
 export interface Competitor {
   name: string;
   strengths: string;
@@ -68,6 +76,7 @@ export interface MarketingPlan {
   marketingMix: MarketingMix;
   contentStrategy: ContentIdea[];
   actionPlan: ActionItem[];
+  riskAnalysis: RiskItem[];
   investmentRecommendations: InvestmentItem[];
   estimatedGrowth: number[]; // Array of 6 numbers representing predicted growth percentage over 6 months
 }

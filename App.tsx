@@ -1,16 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import InputForm from './components/InputForm';
 import ReportView from './components/ReportView';
 import ChatInterface from './components/ChatInterface';
+import Auth from './components/Auth';
 import { generateMarketingPlan } from './services/gemini';
+import { auth } from './services/firebase';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { BusinessInput, MarketingPlan, AnalysisStatus } from './types';
-import { Megaphone, Sparkles } from 'lucide-react';
+import { Megaphone, Sparkles, LogOut, Loader2 } from 'lucide-react';
 
 const App: React.FC = () => {
+  // Auth State
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // App State
   const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
   const [marketingPlan, setMarketingPlan] = useState<MarketingPlan | null>(null);
   const [showChat, setShowChat] = useState(false);
   const [chatInitialMessage, setChatInitialMessage] = useState<string>('');
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleFormSubmit = async (data: BusinessInput) => {
     setStatus(AnalysisStatus.LOADING);
@@ -35,7 +51,6 @@ const App: React.FC = () => {
   const handleAskAI = (message: string) => {
     setShowChat(true);
     setChatInitialMessage(message);
-    // Add small delay to ensure chat renders if it wasn't open
     if (!showChat) {
       setTimeout(() => {
         const chatInput = document.querySelector('input[type="text"]') as HTMLInputElement;
@@ -43,6 +58,30 @@ const App: React.FC = () => {
       }, 100);
     }
   };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      resetApp();
+    } catch (error) {
+      console.error("Error signing out", error);
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+          <p className="text-slate-500 font-medium">Memuat Aplikasi...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20 print:bg-white print:pb-0">
@@ -62,11 +101,12 @@ const App: React.FC = () => {
                 <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider -mt-1">Marketing Strategist</p>
               </div>
             </div>
-            {status === AnalysisStatus.SUCCESS && (
-              <div className="flex items-center gap-4 no-print">
+
+            <div className="flex items-center gap-4 no-print">
+              {status === AnalysisStatus.SUCCESS && (
                 <button 
                   onClick={() => setShowChat(!showChat)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`hidden md:block px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     showChat 
                       ? 'bg-indigo-100 text-indigo-700' 
                       : 'text-slate-600 hover:bg-slate-100'
@@ -74,8 +114,30 @@ const App: React.FC = () => {
                 >
                   {showChat ? 'Tutup Chat' : 'Tanya AI'}
                 </button>
+              )}
+              
+              <div className="h-6 w-px bg-slate-200 mx-1 hidden md:block"></div>
+              
+              <div className="flex items-center gap-3">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt={user.displayName || "User"} className="w-8 h-8 rounded-full border border-slate-200 object-cover" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">
+                    {user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="text-sm font-medium text-slate-700 hidden sm:block">
+                  {user.displayName || user.email?.split('@')[0]}
+                </span>
+                <button 
+                  onClick={handleLogout}
+                  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </nav>

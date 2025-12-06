@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { BusinessInput, MarketingPlan } from "../types";
 
@@ -83,6 +84,20 @@ const planSchema: Schema = {
         required: ["title", "description", "impact", "difficulty"],
       },
     },
+    riskAnalysis: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          riskType: { type: Type.STRING, description: "Jenis risiko (e.g. Operasional, Finansial, Pasar)" },
+          description: { type: Type.STRING, description: "Deskripsi risiko" },
+          impact: { type: Type.STRING, enum: ["High", "Medium", "Low"] },
+          mitigation: { type: Type.STRING, description: "Strategi mitigasi risiko" },
+        },
+        required: ["riskType", "description", "impact", "mitigation"],
+      },
+      description: "Analisis risiko potensial dan strategi mitigasi."
+    },
     investmentRecommendations: {
       type: Type.ARRAY,
       items: {
@@ -107,7 +122,7 @@ const planSchema: Schema = {
       description: "Projected percentage growth for the next 6 months (e.g., [5, 10, 15, 22, 30, 40]) based on successful strategy implementation."
     }
   },
-  required: ["executiveSummary", "marketAnalysis", "competitorAnalysis", "targetPersona", "swot", "marketingMix", "contentStrategy", "actionPlan", "investmentRecommendations", "estimatedGrowth"],
+  required: ["executiveSummary", "marketAnalysis", "competitorAnalysis", "targetPersona", "swot", "marketingMix", "contentStrategy", "actionPlan", "riskAnalysis", "investmentRecommendations", "estimatedGrowth"],
 };
 
 export const generateMarketingPlan = async (input: BusinessInput): Promise<MarketingPlan> => {
@@ -126,6 +141,7 @@ export const generateMarketingPlan = async (input: BusinessInput): Promise<Marke
     2. Berikan rekomendasi investasi strategis (misalnya: alokasi budget untuk Ads, Tools, atau Influencer).
     3. Untuk setiap rekomendasi investasi, sertakan 2-3 KPI (Key Performance Indicators) spesifik untuk mengukur keberhasilannya.
     4. Berikan 6 ide konten digital marketing yang kreatif, spesifik, dan viral-potential (tentukan platform, tipe, dan topik).
+    5. Identifikasi 3-5 risiko bisnis potensial dan strategi mitigasinya.
     Gunakan Bahasa Indonesia yang formal dan bisnis.
   `;
 
