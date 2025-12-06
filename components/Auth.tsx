@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
 import { auth, storage } from '../services/firebase';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  updateProfile 
-} from 'firebase/auth';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Megaphone, Mail, Lock, User, Upload, AlertCircle, Loader2 } from 'lucide-react';
 
 const Auth: React.FC = () => {
@@ -35,7 +29,7 @@ const Auth: React.FC = () => {
       if (isLogin) {
         // LOGIN LOGIC
         try {
-          await signInWithEmailAndPassword(auth, email, password);
+          await auth.signInWithEmailAndPassword(email, password);
         } catch (err: any) {
           if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
             throw new Error("Password atau email tidak tepat");
@@ -52,22 +46,24 @@ const Auth: React.FC = () => {
         }
 
         try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
           const user = userCredential.user;
           let photoURL = '';
 
-          // Upload Profile Photo if exists
-          if (photo) {
-            const storageRef = ref(storage, `profile_photos/${user.uid}`);
-            await uploadBytes(storageRef, photo);
-            photoURL = await getDownloadURL(storageRef);
+          // Upload Profile Photo if exists (using v8 storage syntax)
+          if (photo && user) {
+            const storageRef = storage.ref(`profile_photos/${user.uid}`);
+            await storageRef.put(photo);
+            photoURL = await storageRef.getDownloadURL();
           }
 
-          // Update Profile
-          await updateProfile(user, {
-            displayName: name,
-            photoURL: photoURL
-          });
+          // Update Profile (using v8 user object method)
+          if (user) {
+            await user.updateProfile({
+              displayName: name,
+              photoURL: photoURL
+            });
+          }
         } catch (err: any) {
           if (err.code === 'auth/email-already-in-use') {
             throw new Error("Pengguna telah ada");

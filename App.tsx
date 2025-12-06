@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import InputForm from './components/InputForm';
 import ReportView from './components/ReportView';
@@ -6,7 +7,7 @@ import Auth from './components/Auth';
 import HistoryList from './components/HistoryList';
 import { generateMarketingPlan } from './services/gemini';
 import { auth } from './services/firebase';
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import firebase from 'firebase/compat/app';
 import { BusinessInput, MarketingPlan, AnalysisStatus, HistoryItem } from './types';
 import { Megaphone, Sparkles, LogOut, Loader2, CheckCircle, BrainCircuit, Search, BarChart3, PenTool } from 'lucide-react';
 
@@ -20,7 +21,7 @@ const ANALYSIS_STEPS = [
 
 const App: React.FC = () => {
   // Auth State
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<firebase.User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   // App State
@@ -36,7 +37,7 @@ const App: React.FC = () => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       setUser(currentUser);
       setAuthLoading(false);
     });
@@ -144,7 +145,7 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await auth.signOut();
       // Optional: Clear history on logout if you want privacy per session, 
       // but localStorage is browser-based so usually kept.
       // setHistory([]); 
