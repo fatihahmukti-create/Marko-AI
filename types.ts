@@ -81,6 +81,14 @@ export interface MarketingPlan {
   estimatedGrowth: number[]; // Array of 6 numbers representing predicted growth percentage over 6 months
 }
 
+export interface HistoryItem {
+  id: string;
+  date: string;
+  businessName: string;
+  industry: string;
+  plan: MarketingPlan;
+}
+
 export interface ChatMessage {
   role: 'user' | 'model';
   content: string;

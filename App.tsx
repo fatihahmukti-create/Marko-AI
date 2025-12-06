@@ -3,11 +3,20 @@ import InputForm from './components/InputForm';
 import ReportView from './components/ReportView';
 import ChatInterface from './components/ChatInterface';
 import Auth from './components/Auth';
+import HistoryList from './components/HistoryList';
 import { generateMarketingPlan } from './services/gemini';
 import { auth } from './services/firebase';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { BusinessInput, MarketingPlan, AnalysisStatus } from './types';
-import { Megaphone, Sparkles, LogOut, Loader2 } from 'lucide-react';
+import { BusinessInput, MarketingPlan, AnalysisStatus, HistoryItem } from './types';
+import { Megaphone, Sparkles, LogOut, Loader2, CheckCircle, BrainCircuit, Search, BarChart3, PenTool } from 'lucide-react';
+
+const ANALYSIS_STEPS = [
+  { icon: <Search className="w-5 h-5" />, label: "Menganalisis Industri & Tren Pasar", duration: 2500 },
+  { icon: <BrainCircuit className="w-5 h-5" />, label: "Mempelajari Kompetitor & Celah Pasar", duration: 3000 },
+  { icon: <BarChart3 className="w-5 h-5" />, label: "Merumuskan Strategi SWOT & 4P", duration: 2500 },
+  { icon: <PenTool className="w-5 h-5" />, label: "Menyusun Ide Konten Kreatif", duration: 2000 },
+  { icon: <Sparkles className="w-5 h-5" />, label: "Finalisasi Laporan Strategi", duration: 2000 },
+];
 
 const App: React.FC = () => {
   // Auth State
@@ -19,6 +28,12 @@ const App: React.FC = () => {
   const [marketingPlan, setMarketingPlan] = useState<MarketingPlan | null>(null);
   const [showChat, setShowChat] = useState(false);
   const [chatInitialMessage, setChatInitialMessage] = useState<string>('');
+  
+  // History State
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  
+  // Loading Animation State
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -28,12 +43,64 @@ const App: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
+  // Load history from localStorage on mount
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('marko_history');
+    if (savedHistory) {
+      try {
+        setHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error("Failed to parse history", e);
+      }
+    }
+  }, []);
+
+  // Effect to handle the progressive loading steps
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    
+    if (status === AnalysisStatus.LOADING) {
+      setCurrentStepIndex(0);
+      
+      const advanceStep = (index: number) => {
+        if (index < ANALYSIS_STEPS.length - 1) {
+          timeout = setTimeout(() => {
+            setCurrentStepIndex(index + 1);
+            advanceStep(index + 1);
+          }, ANALYSIS_STEPS[index].duration);
+        }
+      };
+
+      advanceStep(0);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [status]);
+
   const handleFormSubmit = async (data: BusinessInput) => {
     setStatus(AnalysisStatus.LOADING);
     try {
       const plan = await generateMarketingPlan(data);
       setMarketingPlan(plan);
-      setStatus(AnalysisStatus.SUCCESS);
+      
+      // Save to History
+      const newHistoryItem: HistoryItem = {
+        id: Date.now().toString(),
+        date: new Date().toISOString(),
+        businessName: data.businessName,
+        industry: data.industry,
+        plan: plan
+      };
+      
+      const updatedHistory = [newHistoryItem, ...history];
+      setHistory(updatedHistory);
+      localStorage.setItem('marko_history', JSON.stringify(updatedHistory));
+
+      // Ensure we show the last step briefly before showing success
+      setCurrentStepIndex(ANALYSIS_STEPS.length - 1);
+      setTimeout(() => {
+        setStatus(AnalysisStatus.SUCCESS);
+      }, 1000);
     } catch (error) {
       console.error("Failed to generate plan", error);
       setStatus(AnalysisStatus.ERROR);
@@ -46,6 +113,22 @@ const App: React.FC = () => {
     setStatus(AnalysisStatus.IDLE);
     setShowChat(false);
     setChatInitialMessage('');
+    setCurrentStepIndex(0);
+  };
+
+  const handleHistorySelect = (item: HistoryItem) => {
+    setMarketingPlan(item.plan);
+    setStatus(AnalysisStatus.SUCCESS);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleHistoryDelete = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Apakah Anda yakin ingin menghapus riwayat strategi ini?')) {
+      const updatedHistory = history.filter(item => item.id !== id);
+      setHistory(updatedHistory);
+      localStorage.setItem('marko_history', JSON.stringify(updatedHistory));
+    }
   };
 
   const handleAskAI = (message: string) => {
@@ -62,6 +145,9 @@ const App: React.FC = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      // Optional: Clear history on logout if you want privacy per session, 
+      // but localStorage is browser-based so usually kept.
+      // setHistory([]); 
       resetApp();
     } catch (error) {
       console.error("Error signing out", error);
@@ -90,11 +176,14 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-indigo-600 to-violet-600 p-2 rounded-lg shadow-lg shadow-indigo-200 flex items-center justify-center relative group">
+              <div 
+                className="bg-gradient-to-br from-indigo-600 to-violet-600 p-2 rounded-lg shadow-lg shadow-indigo-200 flex items-center justify-center relative group cursor-pointer"
+                onClick={resetApp}
+              >
                 <Megaphone className="h-5 w-5 text-white" />
                 <Sparkles className="h-3 w-3 text-yellow-300 absolute -top-1 -right-1 animate-pulse" />
               </div>
-              <div>
+              <div onClick={resetApp} className="cursor-pointer">
                  <span className="font-extrabold text-xl tracking-tight text-slate-800 flex items-center gap-1">
                   Marko <span className="text-indigo-600">AI</span>
                 </span>
@@ -157,21 +246,76 @@ const App: React.FC = () => {
               </p>
             </div>
             <InputForm onSubmit={handleFormSubmit} isLoading={false} />
+            
+            <HistoryList 
+              history={history} 
+              onSelect={handleHistorySelect}
+              onDelete={handleHistoryDelete}
+            />
           </div>
         )}
 
         {status === AnalysisStatus.LOADING && (
-          <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
-            <div className="relative w-24 h-24">
-              <div className="absolute top-0 left-0 w-full h-full border-4 border-indigo-200 rounded-full animate-ping opacity-75"></div>
-              <div className="absolute top-0 left-0 w-full h-full border-4 border-t-indigo-600 border-r-transparent border-b-indigo-600 border-l-transparent rounded-full animate-spin"></div>
-              <Sparkles className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-indigo-600 w-8 h-8 animate-pulse" />
-            </div>
-            <div className="text-center">
-              <h3 className="text-xl font-bold text-slate-800">Sedang Meracik Strategi...</h3>
-              <p className="text-slate-500 mt-2 max-w-md mx-auto">
-                Marko sedang menganalisis tren pasar, mempelajari kompetitor, dan menghitung estimasi investasi terbaik.
+          <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
+            <div className="text-center mb-8">
+              <div className="relative w-20 h-20 mx-auto mb-4">
+                <div className="absolute top-0 left-0 w-full h-full border-4 border-indigo-100 rounded-full animate-ping opacity-75"></div>
+                <div className="relative w-full h-full bg-white rounded-full border-2 border-indigo-100 flex items-center justify-center">
+                  <Sparkles className="w-8 h-8 text-indigo-600 animate-pulse" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-slate-800">Sedang Meracik Strategi</h3>
+              <p className="text-slate-500 mt-2 text-sm">
+                Mohon tunggu, Marko sedang menganalisis data bisnis Anda...
               </p>
+            </div>
+
+            <div className="space-y-4 relative">
+              <div className="absolute left-4 top-2 bottom-6 w-0.5 bg-slate-100"></div>
+              {ANALYSIS_STEPS.map((step, index) => {
+                const isActive = index === currentStepIndex;
+                const isCompleted = index < currentStepIndex;
+                const isPending = index > currentStepIndex;
+
+                return (
+                  <div key={index} className="relative flex items-center gap-4 z-10">
+                    <div 
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 border-2 ${
+                        isCompleted ? 'bg-emerald-500 border-emerald-500 text-white' : 
+                        isActive ? 'bg-white border-indigo-600 text-indigo-600 shadow-lg shadow-indigo-200' : 
+                        'bg-white border-slate-200 text-slate-300'
+                      }`}
+                    >
+                      {isCompleted ? <CheckCircle className="w-5 h-5" /> : 
+                       isActive ? <Loader2 className="w-4 h-4 animate-spin" /> :
+                       <div className="w-2 h-2 rounded-full bg-current" />}
+                    </div>
+                    
+                    <div className={`flex-1 transition-all duration-500 ${isActive ? 'translate-x-1' : ''}`}>
+                      <p className={`text-sm font-medium transition-colors duration-300 ${
+                        isCompleted ? 'text-slate-500' : 
+                        isActive ? 'text-indigo-700 font-bold' : 
+                        'text-slate-400'
+                      }`}>
+                        {step.label}
+                      </p>
+                    </div>
+
+                    {isActive && (
+                      <div className="animate-fade-in text-indigo-600">
+                        {step.icon}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="mt-8 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+              <div 
+                className="h-full bg-indigo-600 transition-all duration-700 ease-out"
+                style={{ width: `${((currentStepIndex + 0.5) / ANALYSIS_STEPS.length) * 100}%` }}
+              ></div>
             </div>
           </div>
         )}
