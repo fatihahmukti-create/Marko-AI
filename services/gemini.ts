@@ -1,16 +1,10 @@
-
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { BusinessInput, MarketingPlan } from "../types";
 
-const apiKey = process.env.API_KEY;
 // Using gemini-2.5-flash for speed and efficiency in generating structured plans
 const MODEL_NAME = "gemini-2.5-flash"; 
 
-if (!apiKey) {
-  console.error("API_KEY is not defined in process.env");
-}
-
-const ai = new GoogleGenAI({ apiKey: apiKey || '' });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const planSchema: Schema = {
   type: Type.OBJECT,
