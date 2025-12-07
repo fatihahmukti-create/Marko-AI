@@ -33,13 +33,14 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12 print:space-y-6 print:pb-0 print:animate-none">
+    // ID 'printable-area' is crucial for the CSS print fix
+    <div id="printable-area" className="space-y-8 animate-fade-in pb-12 print:space-y-6 print:pb-0 print:animate-none">
       {/* Header Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid print:p-0 print:border-none print:shadow-none">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid print:p-6 print:border-b print:border-slate-300 print:shadow-none">
         <div className="flex justify-between items-start flex-wrap gap-4 mb-6">
           <div>
             <h2 className="text-3xl font-bold text-slate-800 mb-2">Analisis & Strategi Pemasaran</h2>
-            <p className="text-slate-500">Dibuat khusus oleh Marko AI</p>
+            <p className="text-slate-500">Dibuat khusus oleh Marko AI untuk <span className="font-bold text-indigo-600">{plan.executiveSummary.substring(0, 0)}Bisnis Anda</span></p>
           </div>
           <div className="flex gap-3 no-print">
             <button 
@@ -57,7 +58,7 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
           </div>
         </div>
         
-        <div className="bg-indigo-50 p-6 rounded-xl border border-indigo-100 print:bg-white print:border-slate-200">
+        <div className="bg-indigo-50 p-6 rounded-xl border border-indigo-100 print:bg-white print:border print:border-slate-200">
           <h3 className="text-lg font-bold text-indigo-900 mb-2 print:text-slate-900">Ringkasan Eksekutif</h3>
           <p className="text-indigo-800 leading-relaxed text-sm md:text-base print:text-slate-700">{plan.executiveSummary}</p>
         </div>
@@ -65,7 +66,7 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
 
       {/* Market & Growth Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 print:grid-cols-1 print:gap-6">
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col break-inside-avoid">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col break-inside-avoid print:border print:border-slate-200">
           <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
             <TrendingUp className="text-emerald-500" /> Proyeksi Pertumbuhan
           </h3>
@@ -100,7 +101,7 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
           <p className="text-xs text-slate-400 mt-4 text-center">*Angka hanyalah estimasi prediksi AI.</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 break-inside-avoid">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 break-inside-avoid print:border print:border-slate-200">
           <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
              <Users className="text-purple-500" /> Analisis Pasar & Persona
           </h3>
@@ -122,14 +123,14 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
       </div>
 
       {/* Competitor Analysis */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid print:p-6">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid print:p-6 print:border print:border-slate-200">
         <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
           <Swords className="w-6 h-6 text-rose-500" /> Analisis Kompetitor
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 print:grid-cols-3">
           {plan.competitorAnalysis.competitors.map((comp, idx) => (
-            <div key={idx} className="bg-slate-50 rounded-xl p-5 border border-slate-200 print:bg-white">
+            <div key={idx} className="bg-slate-50 rounded-xl p-5 border border-slate-200 print:bg-white print:border print:border-slate-300">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100 font-bold text-slate-700">
                   {idx + 1}
@@ -150,7 +151,7 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
           ))}
         </div>
 
-        <div className="bg-gradient-to-r from-violet-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg print:bg-white print:text-black print:border print:border-slate-200 print:shadow-none">
+        <div className="bg-gradient-to-r from-violet-500 to-indigo-600 rounded-xl p-6 text-white shadow-lg print:bg-white print:text-black print:border print:border-slate-300 print:shadow-none">
           <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
             <Zap className="w-5 h-5 text-yellow-300 print:text-yellow-600" /> Celah Pasar (Market Gap)
           </h4>
@@ -161,15 +162,15 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
       </div>
 
       {/* Risk Analysis Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid page-break-before">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid page-break-before print:border print:border-slate-200">
         <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
           <ShieldAlert className="w-7 h-7 text-orange-500" /> Analisis Risiko & Mitigasi
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:grid-cols-2">
           {plan.riskAnalysis?.map((risk, index) => (
-            <div key={index} className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden break-inside-avoid print:bg-white">
-              <div className="bg-slate-100 px-5 py-3 border-b border-slate-200 flex justify-between items-center print:bg-white print:border-b">
+            <div key={index} className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden break-inside-avoid print:bg-white print:border print:border-slate-300">
+              <div className="bg-slate-100 px-5 py-3 border-b border-slate-200 flex justify-between items-center print:bg-slate-50">
                 <div className="font-bold text-slate-800 flex items-center gap-2">
                   <Activity className="w-4 h-4 text-slate-500" />
                   {risk.riskType}
@@ -199,14 +200,14 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
       </div>
 
       {/* Content Strategy Generator Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid print:border print:border-slate-200">
         <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
           <Smartphone className="w-7 h-7 text-pink-500" /> Ide Konten Digital
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 print:grid-cols-2">
           {plan.contentStrategy?.map((idea, index) => (
-            <div key={index} className="bg-white rounded-xl border border-slate-200 p-5 break-inside-avoid flex flex-col h-full hover:shadow-md transition-shadow">
+            <div key={index} className="bg-white rounded-xl border border-slate-200 p-5 break-inside-avoid flex flex-col h-full hover:shadow-md transition-shadow print:border print:border-slate-300 print:shadow-none">
               <div className="flex justify-between items-start mb-3">
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
                   {idea.platform}
@@ -224,7 +225,7 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
                 <span className="text-slate-600">{idea.contentType}</span>
               </div>
 
-              {/* Chat Integration Buttons */}
+              {/* Chat Integration Buttons - Hidden in Print */}
               <div className="grid grid-cols-2 gap-2 mt-auto no-print">
                 <button 
                   onClick={() => onAskAI && onAskAI(`Buatkan script lengkap dan caption menarik untuk ide konten ini: "${idea.topic}" di platform ${idea.platform}. Deskripsi: ${idea.description}`)}
@@ -245,18 +246,18 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
       </div>
 
       {/* SWOT Analysis */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid page-break-before">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid page-break-before print:border print:border-slate-200">
         <h3 className="text-2xl font-bold text-slate-800 mb-6 text-center">Analisis SWOT</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:gap-4">
           {/* Strengths */}
-          <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-100 print:bg-white print:border-slate-200">
+          <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-100 print:bg-white print:border print:border-emerald-200">
             <h4 className="font-bold text-emerald-800 mb-3 flex items-center gap-2 print:text-emerald-700">
               <ShieldCheck className="w-5 h-5" /> Kekuatan (Strengths)
             </h4>
             <ul className="space-y-2">
               {plan.swot.strengths.map((item, i) => (
                 <li key={i} className="text-sm text-emerald-900 flex items-start gap-2 print:text-slate-700">
-                  <span className="mt-1.5 w-1.5 h-1.5 bg-emerald-500 rounded-full flex-shrink-0"></span>
+                  <span className="mt-1.5 w-1.5 h-1.5 bg-emerald-500 rounded-full flex-shrink-0 print:bg-emerald-600"></span>
                   {item}
                 </li>
               ))}
@@ -264,14 +265,14 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
           </div>
           
           {/* Weaknesses */}
-          <div className="bg-orange-50 p-6 rounded-xl border border-orange-100 print:bg-white print:border-slate-200">
+          <div className="bg-orange-50 p-6 rounded-xl border border-orange-100 print:bg-white print:border print:border-orange-200">
             <h4 className="font-bold text-orange-800 mb-3 flex items-center gap-2 print:text-orange-700">
               <AlertTriangle className="w-5 h-5" /> Kelemahan (Weaknesses)
             </h4>
             <ul className="space-y-2">
               {plan.swot.weaknesses.map((item, i) => (
                 <li key={i} className="text-sm text-orange-900 flex items-start gap-2 print:text-slate-700">
-                  <span className="mt-1.5 w-1.5 h-1.5 bg-orange-500 rounded-full flex-shrink-0"></span>
+                  <span className="mt-1.5 w-1.5 h-1.5 bg-orange-500 rounded-full flex-shrink-0 print:bg-orange-600"></span>
                   {item}
                 </li>
               ))}
@@ -279,14 +280,14 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
           </div>
 
           {/* Opportunities */}
-          <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 print:bg-white print:border-slate-200">
+          <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 print:bg-white print:border print:border-blue-200">
             <h4 className="font-bold text-blue-800 mb-3 flex items-center gap-2 print:text-blue-700">
               <Zap className="w-5 h-5" /> Peluang (Opportunities)
             </h4>
             <ul className="space-y-2">
               {plan.swot.opportunities.map((item, i) => (
                 <li key={i} className="text-sm text-blue-900 flex items-start gap-2 print:text-slate-700">
-                  <span className="mt-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></span>
+                  <span className="mt-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0 print:bg-blue-600"></span>
                   {item}
                 </li>
               ))}
@@ -294,14 +295,14 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
           </div>
 
            {/* Threats */}
-           <div className="bg-red-50 p-6 rounded-xl border border-red-100 print:bg-white print:border-slate-200">
+           <div className="bg-red-50 p-6 rounded-xl border border-red-100 print:bg-white print:border print:border-red-200">
             <h4 className="font-bold text-red-800 mb-3 flex items-center gap-2 print:text-red-700">
               <TrendingUp className="w-5 h-5 rotate-180" /> Ancaman (Threats)
             </h4>
             <ul className="space-y-2">
               {plan.swot.threats.map((item, i) => (
                 <li key={i} className="text-sm text-red-900 flex items-start gap-2 print:text-slate-700">
-                  <span className="mt-1.5 w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0"></span>
+                  <span className="mt-1.5 w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0 print:bg-red-600"></span>
                   {item}
                 </li>
               ))}
@@ -311,31 +312,31 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
       </div>
 
       {/* Marketing Mix (4Ps) */}
-      <div className="bg-slate-900 text-white rounded-2xl shadow-xl p-8 break-inside-avoid print:bg-white print:text-black print:border print:border-slate-200 print:shadow-none">
+      <div className="bg-slate-900 text-white rounded-2xl shadow-xl p-8 break-inside-avoid print:bg-white print:text-black print:border print:border-slate-300 print:shadow-none">
         <h3 className="text-2xl font-bold mb-8 text-center print:text-slate-800">Strategi Marketing Mix (4P)</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 print:bg-white print:border-slate-200">
+          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 print:bg-white print:border print:border-slate-200">
             <div className="w-12 h-12 bg-indigo-500/20 rounded-lg flex items-center justify-center mb-4 text-indigo-400 print:bg-indigo-50 print:text-indigo-600">
               <Package className="w-6 h-6" />
             </div>
             <h4 className="font-bold text-lg mb-2">Product</h4>
             <p className="text-slate-300 text-sm leading-relaxed print:text-slate-600">{plan.marketingMix.productStrategy}</p>
           </div>
-          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 print:bg-white print:border-slate-200">
+          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 print:bg-white print:border print:border-slate-200">
             <div className="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center mb-4 text-emerald-400 print:bg-emerald-50 print:text-emerald-600">
               <DollarSign className="w-6 h-6" />
             </div>
             <h4 className="font-bold text-lg mb-2">Price</h4>
             <p className="text-slate-300 text-sm leading-relaxed print:text-slate-600">{plan.marketingMix.priceStrategy}</p>
           </div>
-          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 print:bg-white print:border-slate-200">
+          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 print:bg-white print:border print:border-slate-200">
             <div className="w-12 h-12 bg-pink-500/20 rounded-lg flex items-center justify-center mb-4 text-pink-400 print:bg-pink-50 print:text-pink-600">
               <MapPin className="w-6 h-6" />
             </div>
             <h4 className="font-bold text-lg mb-2">Place</h4>
             <p className="text-slate-300 text-sm leading-relaxed print:text-slate-600">{plan.marketingMix.placeStrategy}</p>
           </div>
-          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 print:bg-white print:border-slate-200">
+          <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 print:bg-white print:border print:border-slate-200">
              <div className="w-12 h-12 bg-amber-500/20 rounded-lg flex items-center justify-center mb-4 text-amber-400 print:bg-amber-50 print:text-amber-600">
               <Megaphone className="w-6 h-6" />
             </div>
@@ -346,14 +347,14 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
       </div>
 
       {/* Investment Recommendation Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid page-break-before">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid page-break-before print:border print:border-slate-200">
         <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
           <PiggyBank className="w-7 h-7 text-indigo-600" /> Rekomendasi Investasi Strategis
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {plan.investmentRecommendations?.map((item, index) => (
-            <div key={index} className="bg-indigo-50/50 rounded-xl p-6 border border-indigo-100 flex flex-col h-full print:bg-white print:border-slate-200">
+            <div key={index} className="bg-indigo-50/50 rounded-xl p-6 border border-indigo-100 flex flex-col h-full print:bg-white print:border print:border-slate-300">
               <div className="flex justify-between items-start mb-4">
                 <Briefcase className="w-6 h-6 text-indigo-600" />
                 <span className={`px-2 py-1 rounded text-xs font-bold uppercase border ${
@@ -385,11 +386,11 @@ const ReportView: React.FC<ReportViewProps> = ({ plan, onReset, onAskAI }) => {
       </div>
 
       {/* Action Plan */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 break-inside-avoid print:border print:border-slate-200">
         <h3 className="text-2xl font-bold text-slate-800 mb-6">Rencana Aksi Taktis</h3>
         <div className="space-y-4">
           {plan.actionPlan.map((action, index) => (
-            <div key={index} className="flex flex-col md:flex-row gap-4 p-5 rounded-xl border border-slate-200 bg-slate-50/50 break-inside-avoid print:bg-white">
+            <div key={index} className="flex flex-col md:flex-row gap-4 p-5 rounded-xl border border-slate-200 bg-slate-50/50 break-inside-avoid print:bg-white print:border print:border-slate-300">
               <div className="flex-shrink-0 mt-1">
                 <CheckCircle className="w-6 h-6 text-indigo-600" />
               </div>

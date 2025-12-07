@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Marko - AI Marketing Strategist</title>
-    <!-- Tailwind CDN is kept for simplicity, but in a real Vite build you'd usually import CSS. 
-         However, keeping it here ensures styles work without extra PostCSS config complexity for this snippet. -->
+    <!-- Tailwind CDN is kept for simplicity -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -29,64 +28,62 @@
         background: #94a3b8; 
       }
 
-      /* PRINT STYLES FOR PDF EXPORT */
+      /* ROBUST PRINT STYLES FOR PDF EXPORT */
       @media print {
+        /* 1. Reset Page */
         @page {
           margin: 10mm;
           size: auto;
         }
-        
-        /* Critical: Reset height and overflow to allow multi-page printing */
-        html, body, #root, main {
-          height: auto !important;
-          overflow: visible !important;
-          width: 100% !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          background-color: white !important;
+
+        /* 2. Hide EVERYTHING by default */
+        body * {
+          visibility: hidden;
         }
 
-        /* Force background colors to print */
+        /* 3. Unhide ONLY the printable area and its children */
+        #printable-area, #printable-area * {
+          visibility: visible;
+        }
+
+        /* 4. Position the printable area at the very top-left of the page */
+        #printable-area {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          background-color: white;
+        }
+
+        /* 5. Disable animations/transitions to prevent "blank" snapshots */
+        * {
+          -webkit-transition: none !important;
+          transition: none !important;
+          -webkit-animation: none !important;
+          animation: none !important;
+        }
+
+        /* 6. Ensure graphics (background colors) are printed */
         * {
           print-color-adjust: exact !important;
           -webkit-print-color-adjust: exact !important;
         }
 
-        /* Hide interactive elements */
-        nav, button, .no-print {
+        /* 7. Hide buttons specifically inside the printable area */
+        .no-print {
           display: none !important;
         }
 
-        /* Improve typography for print */
-        body {
-          color: black !important;
-          font-size: 12pt;
+        /* 8. Fix Recharts rendering in print */
+        .recharts-responsive-container {
+          width: 100% !important;
+          height: auto !important;
+          min-height: 300px !important;
         }
         
-        h1, h2, h3, h4 {
-          color: #1e293b !important;
-          page-break-after: avoid;
-        }
-
-        p, li {
-          color: #334155 !important;
-          line-height: 1.5;
-        }
-
-        /* Card styling for print */
-        .bg-white, .bg-slate-50, .bg-indigo-50, .bg-emerald-50, .bg-orange-50, .bg-blue-50, .bg-red-50 {
-          border: 1px solid #e2e8f0 !important;
-          box-shadow: none !important;
-          break-inside: avoid;
-        }
-
-        /* Chart container fixes */
-        .recharts-responsive-container {
-          min-height: 300px !important;
-          width: 100% !important;
-        }
-
-        /* Page breaking rules */
+        /* 9. Page Break Controls */
         .break-inside-avoid {
           break-inside: avoid;
           page-break-inside: avoid;
@@ -95,21 +92,32 @@
         .page-break-before {
           page-break-before: always;
         }
+
+        /* 10. Typography fixes */
+        p, li, h1, h2, h3, h4 {
+          color: #000 !important;
+        }
+        
+        /* Remove shadows/borders for cleaner print */
+        .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl {
+          box-shadow: none !important;
+          border: 1px solid #ddd !important;
+        }
       }
     </style>
 <script type="importmap">
 {
   "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
-    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
     "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
-    "firebase/": "https://aistudiocdn.com/firebase@^12.6.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
     "vite": "https://aistudiocdn.com/vite@^7.2.6",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "firebase/": "https://aistudiocdn.com/firebase@^12.6.0/"
   }
 }
 </script>
